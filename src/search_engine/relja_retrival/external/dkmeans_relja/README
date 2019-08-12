@@ -1,0 +1,92 @@
+/**
+ * James Philbin <philbinj@gmail.com>, Relja Arandjelovic <relja@robots.ox.ac.uk>
+ * Engineering Department
+ * University of Oxford
+ * Copyright (C) 2014. All rights reserved.
+ * 
+ * Use and modify all you like, but do NOT redistribute. No warranty is 
+ * expressed or implied. No liability or responsibility is assumed.
+ */
+
+=================================================
+  dkmeans: Distributed approximate k-means v0.15.1
+       James Philbin <philbinj@gmail.com>
+       Relja Arandjelovic <relja@robots.ox.ac.uk>
+=================================================
+An implementation in Python and C++ of the approximate k-means (AKM)
+algorithm of [1]. It's designed to scaleably run over clusters and
+achieves this using MPI. However it will also happily run on single
+machines (in which case an MPI library is not required).
+
+[1] Object retrieval with large vocabularies and fast spatial matching
+    Philbin, J. , Chum, O. , Isard, M. , Sivic, J. and Zisserman, A.
+    CVPR 2007
+
+The original code was made by James Philbin, this is a stripped down version
+by Relja Arandjelovic where the file format is simplified (removed the
+PyTables dependency), applying the RootSIFT feature map on-the-fly
+is supported, and a few bugs were fixed.
+
+
+Requirements
+============
+1. Python >= 2.5       http://www.python.org/
+2. Numpy >= 1.0.4      http://www.scipy.org/Download
+3. C++ compiler
+--- Optional (for parallel computing) ---
+4. OpenMPI >= 1.2.5    http://www.open-mpi.org/) -- Recommended mpi
+5. Pypar >= 2.1.4 *      http://code.google.com/p/pypar/
+
+On Ubuntu:
+sudo apt-get install build-essential python python-numpy
+--- Optional:
+sudo apt-get install openmpi-bin libopenmpi-dev
+
+* The Pypar dependency requires a small patch (made by James Philbin)
+to implement mpi.inplace_reduce, provided in pypar_2.1.4_94_patch/
+
+
+Installation
+============
+1. Check all requirements.
+2. Run 'python setup.py install'.
+3. Assuming there are no errors, you're done!
+
+
+Data Storage
+============
+
+To see the expected input (vectors to cluster) and output (cluster centres)
+formats, check dkmeans_relja/io_util.py dkmeans3_save_clusters and pointsObj
+functions.
+
+==== Input: vectors to cluster
+
+Binary file with information stored in this order:
+1. One uint32 number: vector dimensionality
+2. One uint8 number: specifies the type of vector elements, one of [0, 1, 2, 3, 4, 5]
+corresponding to [uint8, uint16, uint32, uint64, float32, float64],
+respectively.
+3. <number of vectors> x <number of dimensions> numbers of type specified in 2.
+Note that the number of vectors is automatically determined from the file size,
+i.e. (file_size - header_size)/(number_of_dimensions x element_type_size)
+
+Example, 60 10-D vectors of float32:
+1. uint32(10)
+2. uint8(4)
+3. 10 float32 numbers of vector0, 10 float32 numbers of vector1, ..,
+10 float32 numbers of vector59
+
+
+==== Output: clusters
+
+Binary file with information stored in this order:
+1. One uint8 number specifying the type of vector elements (see above Input:2.)
+Note that this can be different than the input type, e.g. SIFT input vectors
+are uint8 while output is float32
+2. Two uint32 numbers specifying the number of clusters, and the dimensionality
+3. 5 uint32 numbers containing some extra information mainly used for debugging
+(current iteration number, total number of iterations, number of training vectors,
+dimensionality of training vectors, random seed used)
+4. one float32 number specifying the total distortion of training data
+5. <number of clusters> x <number of dimensions> numbers of type specified in 1.

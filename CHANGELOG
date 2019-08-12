@@ -1,0 +1,7 @@
+## [2.0.0] - not released yet
+
+## [2.0.0-beta1] - 16 August 2018
+ * a basic user interface based solely on HTML, CSS and Javascript
+ * API documentation to access VISE search capabilities
+ * instructions to index images in a cluster
+

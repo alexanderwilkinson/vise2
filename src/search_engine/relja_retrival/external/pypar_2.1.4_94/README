@@ -1,0 +1,10 @@
+This is Pypar 2.1.4 ( http://code.google.com/p/pypar/ )
+with a small patch required for dkmeans_relja.
+The patch is originally made by James Philbin <philbinj@gmail.com> for an older
+version of Pypar, it has been adapted by Relja Arandjelovic
+<relja@robots.ox.ac.uk> to Pypar 2.1.4
+
+Note: when running pypar for the first time, it is likely to fail by saying
+something like libmpi.so.0 not found. This can be fixed easily by doing:
+sudo ln -s /usr/lib/libmpi.so /usr/lib/libmpi.so.0
+

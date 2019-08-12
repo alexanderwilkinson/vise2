@@ -1,0 +1,183 @@
+################################################################################
+## VISE Server API Documentation
+################################################################################
+
+Index of Endpoints:
+  * GET /vise/query/_NAME_/_VERSION_/_search
+  * GET /vise/query/_NAME_/_VERSION_/_filelist
+  * GET /vise/query/_NAME_/_VERSION_/_file
+  * GET /vise/query/_NAME_/_VERSION_/_register
+  * GET /vise/asset/_NAME_/_VERSION_/image/{filename.jpg, __file_id__}
+
+Last Updated:
+  16 Aug. 2018
+
+Author:
+  Abhishek Dutta <adutta@robots.ox.ac.uk>
+
+
+
+
+
+
+==[ GET /vise/query/_NAME_/_VERSION_/_search ]==================================
+
+Description:
+  visual search of database using an image region of one of the images in the 
+  database
+
+URL Parameters:
+  * file_id         : [0,N]       image to be used in query
+  * x               : [int]   specification of image region to be used as query
+  * y               : [int]   specification of image region to be used as query
+  * width           : [int]   specification of image region to be used as query
+  * height          : [int]   specification of image region to be used as query
+  * from            : [int]   returned search results start from "from"
+  * count           : [int]   size of returned search results
+  * score_threshold : [float] returned search results start from "from"
+  * format          : [str]   if set to 'json', response is in JSON format
+
+Data Parameters: None
+
+Sample Call:
+  GET /vise/query/ox5k/1/_search?file_id=2&x=150&y=213&width=354&height=561&from=0&count=2&show_from=0&show_count=45&score_threshold=8&format=json
+
+Sample Success Response:
+  {
+    "search_engine_id": "ox5k/1",
+    "query": {
+      "file_id": 2,
+      "score_threshold": 8,
+      "filename": "all_souls_000002.jpg",
+      "x": 150,
+      "y": 213,
+      "width": 354,
+      "height": 561,
+      "from": 0,
+      "count": 3,
+      "show_from": 0,
+      "show_count": 45
+    },
+    "home_uri": "/vise/home.html",
+    "image_uri_prefix": "/vise/asset/ox5k/1/",
+    "image_uri_namespace": "image/",
+    "query_uri_prefix": "/vise/query/ox5k/1/",
+    "QUERY_RESULT_SIZE": 43,
+    "query_result_subset": [
+      {
+        "file_id": 2,
+        "filename": "all_souls_000002.jpg",
+        "metadata": "",
+        "score": 1630,
+        "H": [1,0,0,0,1,0,0,0,1]
+      }, ...
+      {
+        "file_id": 30,
+        "filename": "all_souls_000040.jpg",
+        "metadata": "",
+        "score": 381,
+        "H": [1.2489, 0.00241179, 159.126, -0.00633374, 1.25579, -103.453, 0, 0, 1]
+      }
+    ]
+  }
+
+
+==[ GET /vise/query/_NAME_/_VERSION_/_filelist ]================================
+
+Description:
+  returns a list of files current indexed by the search engine
+
+URL Parameters:
+  * filename_regex  : [str]   keyword for matching filenames
+  * from            : [int]   returned search results start from "from"
+  * count           : [int]   size of returned search results
+  * show_from       : [int]   (optional, used by VISE default frontend)
+  * show_count      : [int]   (optional, used by VISE default frontend)
+  * format          : [str]   if set to 'json', response is in JSON format
+
+Data Parameters: None
+
+Sample Call:
+  GET /vise/query/ox5k/1/_filelist?from=0&count=3&show_from=0&show_count=45&format=json
+
+Sample Success Response:
+  {
+    "search_engine_id": "ox5k/1",
+    "home_uri": "/vise/home.html",
+    "image_uri_prefix": "/vise/asset/ox5k/1/",
+    "image_uri_namespace": "image/",
+    "query_uri_prefix": "/vise/query/ox5k/1/",
+    "FILELIST_SIZE": 5063,
+    "from": 0,
+    "count": 3,
+    "show_from": 0,
+    "show_count": 45,
+    "filename_regex": "",
+    "file_id_list_subset": [
+      0,
+      1,
+      2
+    ]
+  }
+
+
+==[ GET /vise/query/_NAME_/_VERSION_/_file ]====================================
+
+Description:
+  show image information and provides a tool to select search query region
+
+URL Parameters:
+  * file_id         : [int]   file-id of the image
+
+Data Parameters: None
+
+Sample Call:
+  GET /vise/query/ox5k/1/_file?file_id=2
+
+Sample Success Response:
+  an interface which shows file description and a tool to select region in
+  the image for search query (region selection tool is based on VIA).
+
+
+==[ GET /vise/query/_NAME_/_VERSION_/_register ]================================
+
+Description:
+  registers (or aligns) a region of an image with similar region appearing in 
+  another image but at a different position or with a different scale or 
+  rotation.
+
+URL Parameters:
+  * file1_id        : [int]   file-id whose region is to be registered
+  * x1              : [int]   specification of image region in file1
+  * y1              : [int]   specification of image region in file1
+  * width1          : [int]   specification of image region in file1
+  * height1         : [int]   specification of image region in file1
+  * file2_id        : [int]   another file-id in which the region occurs
+
+Data Parameters: None
+
+Sample Call:
+  GET /vise/query/ox5k/1/_register?file1_id=2&file2_id=62&x1=183&y1=215&width1=296&height1=539
+
+Sample Success Response:
+  a region of file_id=62 registered with the user specified region in file_id=2
+
+
+==[ GET /vise/asset/_NAME_/_VERSION_/image/{filename.jpg, __file_id__}]=========
+
+Description:
+  returns the contents of a file specified using either filename or file-id
+
+URL Parameters: None
+
+Data Parameters: None
+
+Sample Calls:
+  GET /vise/asset/ox5k/1/image/2
+  GET /vise/asset/ox5k/1/image/all_souls_000002.jpg
+
+Sample Success Response:
+  Contents of image
+
+
+

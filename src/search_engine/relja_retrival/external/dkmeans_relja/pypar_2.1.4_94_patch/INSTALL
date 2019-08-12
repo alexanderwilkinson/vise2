@@ -1,0 +1,2 @@
+Copy applyJPpatch.sh and JP.patch to the pypar_2.1.4_94 root directory
+and run applyJPpatch.sh

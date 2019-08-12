@@ -1,0 +1,156 @@
+# VISE Installation in a Linux Server
+#
+# Author    Abhishek Dutta <adutta@robots.ox.ac.uk>
+# Date      9 August 2018
+# Revision  1
+#
+# Notes
+#   - all dependecies are installed in privately (i.e. custom location)
+#   - assumes that the reader is comfortable with downloading and compiling 
+#     libraries using bash terminal in Linux
+#   - tested in Ubuntu 16.04 (for other OS, may require some tweaking)
+#   - requirements: git, virtualenv, python2.7, pip
+
+################################################################################
+# 0. Define environment variables
+export DEP_LIBDIR=/opt/vgg/software/vise/dep/lib          # update as required
+export DEP_LIBSRC=/opt/vgg/software/vise/dep/tmp_libsrc   # update as required
+export VISE_CODE_DIR=/opt/vgg/software/vise/code          # update as required
+export VISE_DATA_DIR=/opt/vgg/software/vise/data          # update as required
+export SEARCH_ENGINE_NAME="myse"                          # update as required
+export CPU_CORE_COUNT=24                                  # update as required
+
+export PATH=$PATH:$DEP_LIBDIR"/bin"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DEP_LIBDIR"/lib"
+mkdir $DEP_LIBDIR -p && mkdir $DEP_LIBSRC -p && mkdir $VISE_CODE_DIR -p
+
+################################################################################
+# 1. Download VISE source repository
+## only download source, compilation will be done after installing dependencies
+cd $VISE_CODE_DIR
+git clone -b vise-2.x.y --single-branch https://gitlab.com/vgg/vise.git
+mkdir vise/cmake_build -p && cd vise/cmake_build
+
+################################################################################
+# 2. Compile and install all dependencies
+## openmpi 
+cd $DEP_LIBSRC && wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.1.tar.gz && tar -zxvf openmpi-3.1.1.tar.gz && cd openmpi-3.1.1 && ./configure --prefix=$DEP_LIBDIR && make -j 16 && make install
+## cmake
+cd $DEP_LIBSRC && wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz &&	tar -zxvf cmake-3.11.4.tar.gz && cd cmake-3.11.4 && ./configure --prefix=$DEP_LIBDIR && make -j 18 && make install
+## imagemagick
+cd $DEP_LIBSRC && wget https://www.imagemagick.org/download/releases/ImageMagick-6.9.10-9.tar.gz && tar -zxvf ImageMagick-6.9.10-9.tar.gz && cd ImageMagick-6.9.10-9 && ./configure --prefix=$DEP_LIBDIR -enable-hdri=no --with-quantum-depth=8 --disable-dependency-tracking --with-x=no --without-perl && make -j 7 && make install
+## boost
+cd $DEP_LIBSRC && wget https://kent.dl.sourceforge.net/project/boost/boost/1.66.0/boost_1_66_0.tar.gz && tar -zxvf boost_1_66_0.tar.gz && cd boost_1_66_0 && ./bootstrap.sh --prefix=$DEP_LIBDIR --with-toolset=gcc --with-libraries=filesystem,system,thread,date_time,chrono,atomic,timer,mpi,log,serialization && echo "using mpi ;" >> project-config.jam && ./b2 --with-filesystem --with-system --with-thread --with-date_time --with-chrono --with-atomic --with-timer --with-mpi --with-log variant=release threading=multi toolset=gcc install
+sed -i 's/\ result.count/\ (result.count)/g' $DEP_LIBDIR"/include/boost/asio/detail/consuming_buffers.hpp" # to fix an issue with boost-1.66.0
+
+## eigen
+cd $DEP_LIBSRC && wget -O eigen-3.3.5.tar.gz http://bitbucket.org/eigen/eigen/get/3.3.5.tar.gz && tar -zxvf eigen-3.3.5.tar.gz && mv eigen-eigen* eigen-3.3.5 && cd eigen-3.3.5/ && mkdir cmake_build && cd cmake_build && $DEP_LIBDIR"/bin/cmake" -DCMAKE_INSTALL_PREFIX=$DEP_LIBDIR ../ && make -j8 && make install
+## vlfeat
+cd $DEP_LIBSRC && wget http://www.vlfeat.org/download/vlfeat-0.9.21-bin.tar.gz && tar -zxvf vlfeat-0.9.21-bin.tar.gz && cd vlfeat-0.9.21 && make -j 8
+## fastann
+### (may be needed) $ yasm -f elf64 ../dist_l2_funcs_exp_64.asm -o dist_l2_funcs_exp_64.o
+cd $VISE_CODE_DIR"/src/search_engine/relja_retrival/external/fastann/" && mkdir cmake_build && cd cmake_build && PREFIX=$DEP_LIBDIR $DEP_LIBDIR"/bin/cmake" $VISE_CODE_DIR"/src/search_engine/relja_retrival/external/fastann/src/" && make && make install
+
+# pypar
+## install all python dependencies in a private location using virtualenv
+virtualenv --python=/usr/bin/python2.7 $DEP_LIBDIR"/python/vise"
+source $DEP_LIBDIR"/python/vise/bin/activate"
+pip install numpy pillow cython
+cd $VISE_CODE_DIR"/src/search_engine/relja_retrival/external/pypar_2.1.4_94/source" && python setup.py build && python compile_pypar_locally.py && python setup.py install && ln -s /usr/lib/libmpi.so /usr/lib/libmpi.so.0
+mpirun -np 3 python -c "import pypar; pypar.finalize();" # to check pypar
+## expected output: Pypar (version 2.1.4) initialised MPI OK with 3 processors
+
+# dkmeans
+cd $VISE_CODE_DIR"/src/search_engine/relja_retrival/external/dkmeans_relja" && python setup.py build && python setup.py install
+
+################################################################################
+# 3. Compile VISE
+cd $VISE_CODE_DIR"/cmake_build" 
+$DEP_LIBDIR"/bin/cmake" -DCMAKE_PREFIX_PATH=$DEP_LIBDIR -DVLFEAT_LIB=$DEP_LIBSRC"/vlfeat-0.9.21/bin/glnxa64/libvl.so" -DVLFEAT_INCLUDE_DIR=$DEP_LIBSRC"/vlfeat-0.9.21/" ../ 
+make -j8
+## to ensure that compilation was successful, invoke "$ ls ../bin/" command
+## and check if the following three files exists in "bin/" folder.
+## api_v2  compute_index_v2  vise_server
+
+################################################################################
+# 4. Indexing
+export SE_ID=${SEARCH_ENGINE_NAME}"/1"  # search engine id: name/version
+export SE_ASSET_DIR=$VISE_DATA_DIR"/asset/"$SE_ID
+export SE_DATA_DIR=$VISE_DATA_DIR"/data/"$SE_ID
+export SE_TEMP_DIR=$VISE_DATA_DIR"/temp/"$SE_ID
+
+mkdir -p $SE_ASSET_DIR && mkdir -p $SE_DATA_DIR && mkdir -p $SE_TEMP_DIR
+## now, save all your images to $SE_ASSET_DIR"image/" folder
+cd $SE_ASSET_DIR"image/"
+find . -type f -printf '%f\n' > $SE_DATA_DIR"imlist.txt" # image filename list
+
+## create configuration file
+export CONFIG_FILENAME=$SE_DATA_DIR"config.txt"
+echo "[$SE_ID]" > $CONFIG_FILENAME
+echo "RootSIFT=true" > $CONFIG_FILENAME
+echo "SIFTscale3=true" > $CONFIG_FILENAME
+echo "hammEmbBits=64" > $CONFIG_FILENAME            ## for huge dataset, use 32
+echo "imagelistFn=imlist.txt" > $CONFIG_FILENAME
+echo "dsetFn=dset.v2bin" > $CONFIG_FILENAME
+echo "clstFn=clst.e3bin" > $CONFIG_FILENAME
+echo "iidxFn=iidx.v2bin" > $CONFIG_FILENAME
+echo "fidxFn=fidx.v2bin" > $CONFIG_FILENAME
+echo "wghtFn=wght.v2bin" > $CONFIG_FILENAME
+echo "trainNumDescs=-1" > $CONFIG_FILENAME          ## descriptors for training visual vocabulary
+echo "vocSize=100000" > $CONFIG_FILENAME            ## visual vocabulary size (e.g. 200k for large dataset)
+echo "cluster_num_iteration=15" > $CONFIG_FILENAME  ## clustering iterations
+echo "hammFn=train_hamm.v2bin" > $CONFIG_FILENAME
+echo "assignFn=train_assign.bin" > $CONFIG_FILENAME
+echo "trainFilesPrefix=train_" > $CONFIG_FILENAME
+echo "asset_dir=$SE_ASSET_DIR" > $CONFIG_FILENAME
+echo "data_dir=$SE_DATA_DIR" > $CONFIG_FILENAME
+echo "temp_dir=$SE_TEMP_DIR" > $CONFIG_FILENAME
+
+## compute SIFT descriptors for training Bag of Words
+cd $VISE_CODE_DIR"/bin" 
+$DEP_LIBDIR"/bin/mpirun" -np $CPU_CORE_COUNT compute_index_v2 trainDescs $SE_ID $CONFIG_FILENAME
+
+## compute clusters in the SIFT descriptor space  (takes a long time to complete)
+cd $VISE_CODE_DIR"/src/search_engine/relja_retrival/v2/indexing/" 
+mpirun -np $CPU_CORE_COUNT python compute_clusters.py $SE_ID $CONFIG_FILENAME
+
+## assign descriptors to clusters
+### (still unsolved) using mpirun for trainAssign stage sometimes results in error
+### Read -1, expected 40000, errno = 14
+### *** Process received signal ***
+### $DEP_LIBDIR"/bin/mpirun" -np $CPU_CORE_COUNT compute_index_v2 trainAssign $SE_ID $CONFIG_FILENAME
+cd $VISE_CODE_DIR"/bin" 
+./compute_index_v2 trainAssign $SE_ID $CONFIG_FILENAME
+
+## compute hamming embeddings
+$DEP_LIBDIR"/bin/mpirun" -np $CPU_CORE_COUNT compute_index_v2 trainHamm $SE_ID $CONFIG_FILENAME
+
+## indexing (takes a long time to complete)
+$DEP_LIBDIR"/bin/mpirun" -np $CPU_CORE_COUNT compute_index_v2 index $SE_ID $CONFIG_FILENAME
+
+## at the end of this process, $SE_DATA_DIR should have the following files
+## train_assign.bin   clst.e3bin    descs.e3bin   dset.v2bin 
+## fidx.e3bin         hamm.v2bin    iidx.e3bin    wght.e3bin
+
+################################################################################
+# 4. Searching
+cd $VISE_CODE_DIR"/bin" 
+export VISE_HOSTNAME="0.0.0.0"
+export VISE_PORT="9971"
+export NUM_THREADS=4
+export VISE_ASSET_DIR=$VISE_DATA_DIR"/asset"
+export VISE_DATA_DIR=$VISE_DATA_DIR"/data"
+export VISE_TEMP_DIR=$VISE_DATA_DIR"/temp"
+export PRELOAD_SEARCH_ENGINE_ID=$SE_ID
+./vise_server $VISE_HOSTNAME $VISE_PORT $NUM_THREADS $VISE_CODE_DIR"/vise/asset" $VISE_DATA_DIR $VISE_ASSET_DIR $VISE_TEMP_DIR $PRELOAD_SEARCH_ENGINE_ID
+
+## in a web browser, open http://localhost:9971/vise/query/myse/1/
+
+
+(the instructions below are optional)
+
+################################################################################
+# 5. Building Docker container (optional)
+cd $VISE_CODE_DIR"/scripts/docker" 
+sudo docker build --rm --no-cache=true -t vise:2.0.0-beta1 .
+

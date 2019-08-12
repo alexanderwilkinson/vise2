@@ -1,0 +1,3 @@
+[25 June 2018] : Abhishek Dutta
+  * trainAssign and trainHamm stages randomly fail with "MPI_Recv: MPI_ERR_TRUNCATE: message truncated" message.
+  * temporary fix: run these stages with single process "mpirun -np 1" (or without the mpirun prefix)

@@ -1,0 +1,119 @@
+Only in ./source/: build
+Only in ./source/: __metadata__.pyc
+diff -crB /home/karen/Downloads/pypar_2.1.4_94/source/mpiext.c ./source/mpiext.c
+*** /home/karen/Downloads/pypar_2.1.4_94/source/mpiext.c	2009-12-22 07:21:30.000000000 +0000
+--- ./source/mpiext.c	2010-11-01 23:30:55.000000000 +0000
+***************
+*** 691,697 ****
+--- 691,748 ----
+    return (Py_None);
+  }
+  
++ /**
++  * JP addition.
++  */
++ static 
++ PyObject *
++ inplace_reduce_array(PyObject *self, PyObject *args)
++ {
++   PyArrayObject *d;
++   int source, op, error, count, myid;
++   MPI_Datatype mpi_type;
++   /*MPI_Status status;*/
++   MPI_Op mpi_op;
+  
++   /* process the parameters */
++   if (!PyArg_ParseTuple(args, "Oii", &d, &op, &source))
++     return NULL;
++    
++   /* Input check and determination of MPI type */          
++   mpi_type = type_map(d, &count);
++   if (!mpi_type) return NULL;  
++ 
++   /* Input check and determination of MPI op */ 
++   /*printf("op: %d\n", op);         */
++   mpi_op = op_map(op);
++   if (!mpi_op) return NULL;  
++    
++   if (op == MAXLOC || op == MINLOC) {
++     /*not implemented*/
++     return Py_BuildValue("i", -666);
++   }
++   else {
++   /* call the MPI routine */
++     //printf("%X %d %d %d %d\n", d->data, count, mpi_type, mpi_op, source);
++     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
++     if (myid==source) { // Root.
++       error =  MPI_Reduce(MPI_IN_PLACE, d->data, count, mpi_type, mpi_op, source, MPI_COMM_WORLD);
++     }
++     else {
++       error =  MPI_Reduce(d->data, 0, count, mpi_type, mpi_op, source, MPI_COMM_WORLD);
++     }
++   }
++          
++   if (error != 0) {
++     MPI_Comm_rank(MPI_COMM_WORLD, &myid);    
++     sprintf(errmsg, "Proc %d: MPI_Reduce failed with error code %d\n", myid, error);
++     PyErr_SetString(PyExc_RuntimeError, errmsg);    /*raise ValueError, errmsg*/
++     return NULL;
++   }  
++   
++     Py_INCREF(Py_None);
++     return (Py_None);
++ }
+  
+  
+  
+***************
+*** 1127,1133 ****
+    {"broadcast_array", broadcast_array, METH_VARARGS},              
+    {"scatter_array", scatter_array, METH_VARARGS},              
+    {"gather_array", gather_array, METH_VARARGS},              
+!   {"reduce_array", reduce_array, METH_VARARGS},              
+    /* Functions providing 'MPI_Bsend' support. */
+    {"bsend_string", bsend_string, METH_VARARGS},
+    {"bsend_array", bsend_array, METH_VARARGS},
+--- 1178,1185 ----
+    {"broadcast_array", broadcast_array, METH_VARARGS},              
+    {"scatter_array", scatter_array, METH_VARARGS},              
+    {"gather_array", gather_array, METH_VARARGS},              
+!   {"reduce_array", reduce_array, METH_VARARGS},
+!   {"inplace_reduce_array", inplace_reduce_array, METH_VARARGS},
+    /* Functions providing 'MPI_Bsend' support. */
+    {"bsend_string", bsend_string, METH_VARARGS},
+    {"bsend_array", bsend_array, METH_VARARGS},
+Only in ./source/: mpiext.c~
+diff -crB /home/karen/Downloads/pypar_2.1.4_94/source/pypar.py ./source/pypar.py
+*** /home/karen/Downloads/pypar_2.1.4_94/source/pypar.py	2009-12-20 04:46:05.000000000 +0000
+--- ./source/pypar.py	2010-11-01 23:13:49.000000000 +0000
+***************
+*** 366,371 ****
+--- 366,375 ----
+          
+      return buffer  
+  
++ def inplace_reduce(x, op, root):
++   """Perform an inplace reduction of x."""
++ 
++   inplace_reduce_array(x, op, root)
+  
+  def reduce(x, op, root, buffer=None, vanilla=0, bypass=False):
+      """Reduce elements in x to buffer (of the same size as x)
+***************
+*** 847,853 ****
+           send_array, receive_array, broadcast_string, broadcast_array,\
+           scatter_string, scatter_array,\
+           gather_string, gather_array,\
+!          reduce_array,\
+  	 bsend_string, bsend_array, \
+  	 mpi_alloc_and_attach, mpi_detach_and_dealloc, \
+  	 mpi_alloc, mpi_dealloc, mpi_attach, mpi_detach, \
+--- 851,857 ----
+           send_array, receive_array, broadcast_string, broadcast_array,\
+           scatter_string, scatter_array,\
+           gather_string, gather_array,\
+!          reduce_array, inplace_reduce_array,\
+  	 bsend_string, bsend_array, \
+  	 mpi_alloc_and_attach, mpi_detach_and_dealloc, \
+  	 mpi_alloc, mpi_dealloc, mpi_attach, mpi_detach, \
+Only in ./source/: pypar.py~

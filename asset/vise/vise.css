@@ -1,0 +1,124 @@
+/*
+Stylesheet for web browser based user interface of VGG Image Search Engine (VISE)
+
+Author: Abhishek Dutta <adutta@robots.ox.ac.uk>
+Date:   22 June 2018
+*/
+
+body { padding:0; margin:0; font-family:sans-serif; }
+* { box-sizing: border-box; }
+a { text-decoration:none; }
+
+.page { width:100%; padding:0 0.5rem; }
+
+.page .nav { display:block; width:100%; padding:0.3rem 0; font-size:small; border-bottom:1px solid #e6e6e6;}
+.page .nav .left_space { margin-left:2rem; }
+.page .nav div {
+  display: inline-block;
+}
+.page .nav div:last-child {
+  float: right;
+}
+.page .top { display:block; width:100%; margin:0.5rem 0; }
+
+/* panel containing VISE logo and some links */
+.page .top .top_left_box { display:inline-block; border:1px solid #808080; vertical-align:top; margin-right:2rem; }
+.page .top .top_left_box .logo img { height: 5rem; }
+.page .top .top_left_box .links { font-size:0.8rem; text-align:center; padding:0.4rem 0;}
+
+/* panel to create new search engine and show its indexing status */
+.page .top .top_right_box { display:block; border:1px solid #e6e6e6; overflow-y:hidden; overflow-x:auto; font-size:0.8rem; width:100%; height:8rem; margin-top:2rem; }
+.page .top .top_right_box * { vertical-align:middle;}
+.page .top .top_right_box .title { display:block; background-color:#f2f2f2; text-align:center; padding:0.2rem 2rem; }
+.page .top .top_right_box .new_search_engine_control_panel { display:none; width:6rem; height:6.4rem; padding:0 2rem; vertical-align:middle; }
+
+.page .top .top_right_box .new_search_engine_control_panel button { font-size:0.8rem; }
+
+.page .top .top_right_box #new_search_engine_image_preview_panel { display:none; text-align:center; width:8rem; height:6.4rem; margin:0 2rem; padding: 0 2rem;}
+.page .top .top_right_box #new_search_engine_image_preview_panel img { display:block; height:4.4rem; margin:auto; }
+.page .top .top_right_box #new_search_engine_image_preview_panel select { display:block; height:1.4rem; border:1px solid #cccccc; background:none; width:12rem; }
+.page .top .top_right_box #new_search_engine_indexing_progress_panel { display:none; font-size:0.8rem; }
+.page .top .top_right_box #new_search_engine_indexing_progress_panel ol { margin:0; margin-left:-0.5rem; }
+.page .top .top_right_box #new_search_engine_indexing_progress_panel .done:after { content: " \02713"; color:green; font-size:1rem;}
+.page .top .top_right_box #new_search_engine_indexing_progress_panel .progress { font-weight:bold; margin-left:0.2rem;}
+.page .top .top_right_box #new_search_engine_indexing_progress_panel .started { font-weight:bold; margin-left:0.2rem; }
+.page .top .top_right_box #new_search_engine_indexing_progress_panel .error:after {  content: " \02717"; color:red; font-size:1rem; }
+.page .top .top_right_box #new_search_engine_metadata_io_panel { display:none; padding:0 2rem; }
+.page .top .top_right_box #new_search_engine_metadata_io_panel input[type=text]{ width:12rem; }
+
+/* panel showing existing search engines */
+.page .middle_panel { display:block; width:100%; border:1px solid #e6e6e6; margin-top:2rem; }
+.page .middle_panel .title { display:block; font-size:0.8em; background-color:#f2f2f2; text-align:center; padding:0.2rem 0;}
+.page .middle_panel .search_engine { display:inline-block; height:14rem; width:10rem; overflow:hidden; border:0px solid #212121; margin:1rem; text-align:center; vertical-align:top; }
+.page .middle_panel .search_engine img {height:70%; margin-bottom:1rem; }
+.page .middle_panel .search_engine span { display:block; font-size:0.8rem; color: #212121; }
+.page .middle_panel .search_engine a:hover span { color:blue; }
+
+/* misc */
+#message_panel          { display:block; width:100%; position:fixed; bottom:0px; z-index:9999; text-align:center; }
+#message_panel .content { display:inline; margin:auto; background-color:#000000; color:#ffff00; font-size:small; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:2rem; padding: 0.5rem 2rem;}
+
+.text_button { color:#0000ff; padding: 0 0.2rem; -moz-user-select:none; -webkit-user-select:none; -ms-user-select:none; }
+.text_button:hover { cursor:pointer; }
+.text_button:active { color: #000000; }
+
+.img_grid {display:block; border:none; margin:0; font-size:0 !important;} /* font-size:0 is needed to get rid of vertical space between image rows */
+.img_with_region { position:relative; display:inline-block; height:200px; margin:0.1rem 0.13rem; }
+.img_with_region img { display:block; max-height:100%; width:auto; }
+.img_with_region svg { display:none; position:absolute; top:0; left:0; fill:none; stroke-width:0.7%; stroke:yellow; }
+.cursor_pointer { cursor:pointer; }
+.cursor_default { cursor:default; }
+
+/* search result page */
+.page .query_container { display:block; text-align:center; margin-top:1rem;}
+.page .query { display:inline-block; background-color:#f6f6f6; padding:1rem 2rem; border-radius:0.5rem; vertical-align:top; }
+.page .query .metadata { display:table; float:left; text-align:left; margin-right:4rem; }
+.page .query .metadata .row { display:table-row; }
+.page .query .metadata .col { display:table-cell; padding:0.3rem 0.5rem; }
+.page .query .query_image { display:inline-block; float:right; }
+
+.page .result { display:block; border:none; margin:0; }
+.page .result .navbar {display:table; width:100%; font-size:0.8rem; padding:2rem 0.2rem;}
+
+.page .result .navbar .navinfo { display:table-cell; width:33%; text-align:left;  vertical-align:middle;}
+.page .result .navbar .navtool { display:table-cell; width:33%; text-align:center;  vertical-align:middle;}
+.page .result .navbar .navbuttons { display:table-cell; width:34%; text-align:right;  vertical-align:middle;}
+
+.page .ri { display:inline-block; border:none; text-align:center; margin:0.5em 0; padding:0.2rem; border:1px solid red;}
+.page .ri .fn { display:block; font-size:small; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.page .ri .md { display:none; }
+.page .ri img { height:14vh; border:1px solid #f2f2f2; }
+
+/* page overlay */
+#page_overlay { display:none; position:fixed; width:100%; height:100%; top:0; left:0; right:0; bottom:0; background-color: rgba(0,0,0,0.6); }
+.noscroll { overflow:hidden; }
+#page_overlay .content { position:fixed; overflow-y:auto; background-color:white; top:50%; left:50%; width:90%; height:80%; transform:translate(-50%,-50%);  padding:1rem; }
+#page_overlay .content .toolbar { display:block; text-align:right; padding:0 0 1rem 0; }
+
+#page_overlay .content .compare_panel { display:table; width:100%; text-align:center; margin:0.5rem 0;}
+#page_overlay .content .compare_panel .row { display:table-row; width:100%; }
+#page_overlay .content .compare_panel .col { display:table-cell; border:1px solid #f2f2f2; padding:1rem 0; font-size:0.8rem; }
+#page_overlay .content .compare_panel .query { display:table-cell; border:1px solid #f2f2f2; padding:1rem; }
+#page_overlay .content .compare_panel .match { display:table-cell; border:1px solid #f2f2f2; padding:1rem; }
+#page_overlay .content .compare_panel .compare { display:table-cell; border:1px solid #f2f2f2; padding:1rem; }
+#page_overlay .content .compare_panel canvas { } /* height or width sould be 100% based on fit */
+#page_overlay .content .compare_panel img { height:auto; padding:1rem; }
+
+/* file region selector and info viewer */
+.page .file {display:block; width:100%; margin-top:2rem; text-align:center; }
+.page .file .metadata_panel {display:block;  padding:1rem 0;}
+.page .file .metadata_panel .info { font-size:small; margin-top:0.5rem; }
+.page .file .region_selector_panel { position: relative; display: inline-block; width: 100%; height: 74vh; min-height: 66vh;}
+.page .file .search_toolbar {display:block; padding:1rem 0;}
+.page .file .search_toolbar button { padding:0.4rem 2rem; }
+
+.display-none {
+    display: none;
+}
+.display-inline-block {
+  display: inline-block;
+}
+.display-block {
+  display: block;
+}
+

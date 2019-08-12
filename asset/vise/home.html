@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VISE</title>
+  <meta name="author" content="Abhishek Dutta">
+  <meta name="description" content="Web browser based user interface for VGG Image Search Engine (VISE).">
+
+  <link rel="shortcut icon" type="image/x-icon" href="/vise/images/favicon.ico"/>
+  <link rel="stylesheet" type="text/css" href="/vise/vise.css" />
+</head>
+
+<body onload="vise_init()">
+  <div class="page">
+    <input type="file" id="invisible_file_input" name="files[]" style="display:none">
+    <div class="top">
+      <div class="top_left_box" id="logo_panel">
+        <div class="logo"><a href="vise.html"><img src="/vise/images/vise_logo.png" alt="VISE Logo" title="VISE Logo"></a></div>
+        <div class="links"><a href="#">home</a>&nbsp;|&nbsp;<a href="#">help</a>&nbsp;|&nbsp;<a href="#">about</a></div>
+      </div>
+
+      <div class="top_right_box" id="new_search_engine_panel">
+        <div class="title">Create New Search Engine</div>
+        <div id="new_search_engine_add_image_panel" class="new_search_engine_control_panel">
+          <button onclick="sel_local_images()" id="new_search_engine_select_image_button">Add Images</button>
+        </div>
+
+        <div id="new_search_engine_image_preview_panel">
+          <img id="new_search_engine_preview_image" title="Preview of added image" src="">
+          <select id="new_search_engine_select_preview_image" onchange="on_new_search_engine_filename_dropdown_update(this)"></select>
+        </div>
+
+        <div id="new_search_engine_metadata_io_panel">
+          <table>
+            <tr>
+              <td>Name</td>
+              <td><input type="text" placeholder="name of search engine" title="Space or special characters (/, $, @, *, ., etc) are not allowed" onchange="on_new_search_engine_name_update(this)"></td>
+            </tr>
+            <tr>
+              <td>Desc.</td>
+              <td><input type="text" placeholder="description (optional)" title="Description of search engine" onchange="on_new_search_engine_desc_update(this)"></td>
+            </tr>
+          </table>
+        </div>
+
+        <div id="new_search_engine_indexing_control_panel" class="new_search_engine_control_panel">
+          <button id="new_search_engine_start_indexing_button" onclick="vise_start_indexing()">Start Indexing</button>
+        </div>
+
+        <div id="new_search_engine_indexing_progress_panel">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="middle_panel" id="load_search_engine_panel">
+      <span class="title">Load Search Engine</span>
+      <div class="search_engine">
+        <a href="/vise/repo/15cbt/1/query" title="Click to load and query this search engine.">
+          <img class="search_engine_image" src="/vise/images/mock/15cbt.jpg">
+          <span class="search_engine_description">15th Century Booktrade (1204 images)</span>
+        </a>
+      </div>
+
+      <div class="search_engine">
+        <a href="/vise/repo/ballads/1/query" title="Click to load and query this search engine.">
+          <img class="search_engine_image" src="/vise/images/mock/ballads.jpg">
+          <span class="search_engine_description">Bodelian Ballads (800 images)</span>
+        </a>
+      </div>
+
+      <div class="search_engine">
+        <a href="/vise/repo/bl_bindings/1/query" title="Click to load and query this search engine.">
+          <img class="search_engine_image" src="/vise/images/mock/bl_bindings.jpg">
+          <span class="search_engine_description">British Library Book Bindings (5055 images)</span>
+        </a>
+      </div>
+
+      <div class="search_engine">
+        <a href="/vise/repo/coins/1/query" title="Click to load and query this search engine.">
+          <img class="search_engine_image" src="/vise/images/mock/coins.jpg">
+          <span class="search_engine_description">UK Coins (1600 images)</span>
+        </a>
+      </div>
+
+      <div class="search_engine">
+        <a href="/vise/repo/mon/1/query" title="Click to load and query this search engine.">
+          <img class="search_engine_image" src="/vise/images/mock/mon.jpg">
+          <span class="search_engine_description">Monuments of Nepal (10112 images)</span>
+        </a>
+      </div>
+
+      <div class="search_engine">
+        <a href="/vise/repo/ox5k/1/query" title="Click to load and query this search engine.">
+          <img class="search_engine_image" src="/vise/images/mock/ox5k.jpg">
+          <span class="search_engine_description">Oxford Buildings (5062 images)</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- to show status messages -->
+    <div id="message_panel">
+      <div id="message_panel_content" class="content"></div>
+    </div>
+  </div> <!-- end of page -->
+
+  <script src="/vise/vise.js"></script>
+</body>
+
+</html>
