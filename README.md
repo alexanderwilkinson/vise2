@@ -1,5 +1,7 @@
 # VGG Image Search Engine (VISE)
 
+VERSION 2 COMMIT TO BE USED WITH ORNAMENTO PROJECT *** 
+
 <img src="res/logo/vise_logo.png" alt="VISE logo" title="VISE logo">
 
 [VGG Image Search Engine](http://www.robots.ox.ac.uk/~vgg/software/vise) (VISE) 
