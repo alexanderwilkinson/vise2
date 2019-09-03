@@ -41,7 +41,7 @@ void SiftDescriptor::PlaceInIndex(float *index,
                      oindex = 0;
                   oweight = cweight * ((ort == 0) ? 1.0 - ofrac : ofrac);
 
-									const int ro = rcindex+oindex
+									const int ro = rcindex+oindex;
 									if(ro < size && ro >= 0)
 										index[ro] += oweight;
                }
