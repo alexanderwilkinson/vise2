@@ -40,8 +40,10 @@ void SiftDescriptor::PlaceInIndex(float *index,
                   if (oindex >= OriSize)  /* Orientation wraps around at PI. */
                      oindex = 0;
                   oweight = cweight * ((ort == 0) ? 1.0 - ofrac : ofrac);
-                  
-		  index[rcindex+oindex]+=oweight;
+
+									const int ro = rcindex+oindex
+									if(ro < size && ro >= 0)
+										index[ro] += oweight;
                }
             }  
          }
