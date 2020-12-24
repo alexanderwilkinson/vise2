@@ -161,7 +161,7 @@ trainDescsWorker::operator() ( uint32_t jobID, trainDescsResult &result ) const 
     
     // get filename
     std::string imageFn= databasePath_ + imageFns_->at(docID);
-    std::cout << "buildWorkerSemiSorted::operator():" << imageFn << std::endl;
+    std::cout << "buildWorkerSemiSorted::operator():" << imageFn << std::endl << std::flush;
 
     // make sure the image exists and is readable
     std::pair<uint32_t, uint32_t> wh= std::make_pair(0,0);
