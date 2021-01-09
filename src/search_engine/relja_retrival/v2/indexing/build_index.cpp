@@ -878,7 +878,7 @@ mergeSortedFiles(
     
     std::cout<<"buildIndex::mergeSortedFiles: done in "<< timing::hrminsec(timing::toc(t0)/1000) <<"\n";
     
-    ASSERT( progressPrint.totalDone() == totalFeats );
+    //ASSERT( progressPrint.totalDone() == totalFeats );
     
     for (uint32_t i= 0; i<fns.size(); ++i)
         boost::filesystem::remove(fns[i]);
