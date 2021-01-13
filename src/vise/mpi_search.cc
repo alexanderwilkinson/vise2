@@ -291,9 +291,11 @@ int main(int argc, char** argv) {
     if(results.size() > 0){
       #pragma omp critical
       {
-        for(unsigned int j=0; j < results.size(); j++)
-        comm.send(root, TAG_RESULT, results[j]);
+        for(unsigned int j=0; j < results.size(); j++){
+          comm.send(root, TAG_RESULT, results[j]);
+        }
       }
+      results.clear();
     }
   }
 }
