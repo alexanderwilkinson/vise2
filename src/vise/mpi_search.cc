@@ -240,8 +240,8 @@ int main(int argc, char** argv) {
 
   //query start,end index
   unsigned int start = rank * chunk_size, end = start + chunk_size;
-  if(rank == (numProc-1)){
-    end += queries.size() % (numProc-1);
+  if(rank == (root-1)){
+    end += queries.size() % (root-1);
   }
 
   if(rank == root){  //master only saves results
