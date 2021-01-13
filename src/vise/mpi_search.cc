@@ -198,6 +198,8 @@ int main(int argc, char** argv) {
     }
     boost::mpi::environment::abort(1);
   }
+  int buf[2];
+  const int root = (numProc - 1);
 
   if(numProc < 2){
     cerr << "Error: At least two nodes are required!" << endl;
@@ -208,7 +210,7 @@ int main(int argc, char** argv) {
   const float threshold = atof(argv[2]);
 
   if( !load_config(cfg)){
-    if(rank == 0){
+    if(rank == root){
       cerr << "Error: Failed to load config" << endl;
     }
     boost::mpi::environment::abort(2);
@@ -220,7 +222,7 @@ int main(int argc, char** argv) {
 
   relja = new vise::relja_retrival(cfg["se_id"], data_path, asset_path, temp_path);
   if(relja == NULL){
-    if(rank == 0){
+    if(rank == root){
       cerr << "Error: relja_retrival new failed" << endl;
     }
     boost::mpi::environment::abort(3);
@@ -230,7 +232,7 @@ int main(int argc, char** argv) {
   if(!load_queries(image_coordinates_fn, queries)){
     return EXIT_FAILURE;
   }
-  if(rank == 0){
+  if(rank == root){
     cout << "Found " << queries.size() << " queries."<< endl;
   }
 
@@ -241,10 +243,6 @@ int main(int argc, char** argv) {
   if(rank == (numProc-1)){
     end += queries.size() % (numProc-1);
   }
-
-  int buf[2];
-  const int root = (numProc - 1);
-
 
   if(rank == root){  //master only saves results
 
