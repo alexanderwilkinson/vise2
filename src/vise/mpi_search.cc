@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
   vector<struct result> results;
 
 #pragma omp for schedule(dynamic)
-  for(unsigned int i=rank * chunk_size; i < end; i++){
+  for(unsigned int i=start; i < end; ++i){
     se_qeury(cfg["se_id"], i, threshold, results); //search
 
     if(results.size() > 0){
