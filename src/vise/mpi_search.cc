@@ -273,6 +273,7 @@ int main(int argc, char** argv) {
 
       //cout << "Node " << st.source() << " found " << results.size() << " results" << endl;
       print_row(ofs, &result); //save result to output file
+      result.clear();
     }
     ofs.close();
 
