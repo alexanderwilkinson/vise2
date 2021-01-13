@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
     end += queries.size() % (root-1);
   }
 
-  if(rank == root){  //master only saves results
+  if(rank == root){  //only root saves results
 
     //append the threshold parameter to filename
     const string output_filename = "output_" + to_string(threshold) + ".csv";
