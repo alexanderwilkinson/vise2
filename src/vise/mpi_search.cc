@@ -199,6 +199,11 @@ int main(int argc, char** argv) {
     boost::mpi::environment::abort(1);
   }
 
+  if(numProc < 2){
+    cerr << "Error: At least two nodes are required!" << endl;
+    boost::mpi::environment::abort(1);
+  }
+
   const char * image_coordinates_fn = argv[1];
   const float threshold = atof(argv[2]);
 
