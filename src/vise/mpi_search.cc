@@ -227,7 +227,13 @@ int main(int argc, char** argv) {
     }
     boost::mpi::environment::abort(3);
   }
-  relja->load();
+
+  if(!relja->load()){
+    if(rank == root){
+      cerr << "Error: relja load failed" << endl;
+    }
+    boost::mpi::environment::abort(5);
+  }
 
   if(!load_queries(image_coordinates_fn, queries)){
     return EXIT_FAILURE;
