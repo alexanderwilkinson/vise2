@@ -189,7 +189,13 @@ int main(int argc, char** argv) {
     cerr << "Error: relja_retrival new failed" << endl;
     return 3;
   }
-  relja->load();
+
+  if(!relja->load()){
+    if(rank == root){
+      cerr << "Error: relja load failed" << endl;
+    }
+    boost::mpi::environment::abort(5);
+  }
 
   if(!load_rows(image_coordinates_fn, queries)){
     return EXIT_FAILURE;
