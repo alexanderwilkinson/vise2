@@ -164,6 +164,8 @@ static void print_row(ofstream& ofs, struct region_query *query, vector<struct r
 
 static bool rejla_load_timeout(int tout){
 
+  relja->load();
+
   while(!relja->is_loaded() && (tout-- > 0)){
     sleep(1);
   }

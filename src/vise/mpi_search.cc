@@ -190,6 +190,8 @@ static void print_row(ofstream& ofs, struct result* result){
 
 static bool rejla_load_timeout(int tout){
 
+  relja->load();
+
   while(!relja->is_loaded() && (tout-- > 0)){
     sleep(1);
   }
