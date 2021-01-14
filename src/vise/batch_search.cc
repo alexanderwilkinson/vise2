@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
     return 3;
   }
 
-  if(!rejla_load_timeout()){
+  if(!rejla_load_timeout(15)){
     if(rank == root){
       cerr << "Error: relja load failed" << endl;
     }
