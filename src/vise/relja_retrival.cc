@@ -73,6 +73,7 @@ bool vise::relja_retrival::load() {
     iidx_ = new protoIndex(*dbIidx_, false);
     BOOST_LOG_TRIVIAL(debug) << "inverted index done";
     cons_queue_->start(); // start the construction of in-RAM stuff
+    cons_queue_->waitCompletion(); // wait for the completion of in-RAM stuff
 
     // feature getter and assigner
     BOOST_LOG_TRIVIAL(debug) << "loading feature getter ";
@@ -162,8 +163,6 @@ bool vise::relja_retrival::load() {
     }
     BOOST_LOG_TRIVIAL(debug) << "finished loading search engine [" << search_engine_id_ << "]";
     is_search_engine_loaded_ = true;
-
-    cons_queue_->waitCompletion(); // wait for the completion of in-RAM stuff
   } catch( std::exception& e ) {
     is_search_engine_loaded_ = false;
     BOOST_LOG_TRIVIAL(debug) << "failed to load search engine [" << search_engine_id_ << "]";
