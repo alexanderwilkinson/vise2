@@ -90,19 +90,13 @@ python setup.py build ; \
 python setup.py install'
 
 # Compile VISE
-# New version of mpi_search available in repo
-ADD mpi_search /mnt/george/vise/mpi_search
 RUN /bin/bash -c 'mkdir -p "${VISE_CODE_DIR}/build/" ; \
-#cp /mnt/george/vise/mpi_search/CMakeLists.txt ${VISE_CODE_DIR}/src/vise/ ; \
-#cp /mnt/george/vise/mpi_search/mpi_search.cc ${VISE_CODE_DIR}/src/vise/ ; \
-#cp /mnt/george/vise/mpi_search/batch_search.cc ${VISE_CODE_DIR}/src/vise/ ; \
 pushd "${VISE_CODE_DIR}/build/" ; \
 cmake -DVLFEAT_LIB=${VISE_DEP_DIR}"/vlfeat-0.9.21/bin/glnxa64/libvl.so" -DVLFEAT_INCLUDE_DIR=${VISE_DEP_DIR}"/vlfeat-0.9.21/" .. ; \
 make ; \
 popd ; \
 #Some cleanup
 rm -rf "${VISE_CODE_DIR}/.git/" ; \
-rm -rf /mnt/george/vise/mpi_search/ ; \
 rm -f /tmp/cmake-3.14.0-Linux-x86_64.sh'
 
 ADD start_vise_server.sh /tmp/start_vise_server.sh
