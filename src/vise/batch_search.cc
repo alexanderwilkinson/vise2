@@ -199,10 +199,8 @@ int main(int argc, char** argv) {
   }
 
   if(!rejla_load_timeout(15)){
-    if(rank == root){
-      cerr << "Error: relja load failed" << endl;
-    }
-    boost::mpi::environment::abort(5);
+    cerr << "Error: relja load failed" << endl;
+    return 5;
   }
 
   if(!load_rows(image_coordinates_fn, queries)){
