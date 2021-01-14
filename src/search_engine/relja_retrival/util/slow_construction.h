@@ -32,21 +32,23 @@ No usage or redistribution is allowed without explicit permission.
 //    the deletion procedure is messed up (this tries to call cleanup functions of
 //    already deleted stuff).
 class sequentialConstructions {
-    
+
     public:
-        
-        sequentialConstructions(): started(false) {}
+
+        sequentialConstructions(): started(false), joined(false) {}
         ~sequentialConstructions();
-        
+
         void addFunction(boost::function<void()> f);
         void addCleanup(boost::function<void()> f);
-        
+
         void start();
-    
+        void waitCompletion();
+
     private:
         void reallyStart();
-        
+
         bool started;
+        bool joined;
         std::vector< boost::function<void()> > fs_;
         std::vector< boost::function<void()> > cleanups_;
         boost::thread *t_;
@@ -64,11 +66,11 @@ class sequentialConstructions {
 
 template <class T>
 class slowConstruction {
-    
+
     public:
-        
+
         class helper;
-        
+
         slowConstruction( T *first, boost::function<T*()> secondConstructor, bool deleteFirst= false, sequentialConstructions* consQueue= NULL ) :
             finished_(false), first_(first), object_(first) {
             boost::function<void()> constructAndSwitch_= boost::bind(
@@ -81,7 +83,7 @@ class slowConstruction {
                 consQueue->addCleanup(boost::bind(&slowConstruction::cleanup, this));
             }
         }
-        
+
         virtual ~slowConstruction() {
             if (constructor_!=NULL) {
                 // wait until the constructor finishes in order to delete its memory and second_
@@ -90,13 +92,13 @@ class slowConstruction {
                 cleanup(); // if sequentialConstructions is used, it performs the cleanup
             }
         }
-        
+
         void cleanup(){
             delete second_;
         }
-        
+
         typedef boost::shared_lock<boost::shared_mutex> readLock;
-        
+
         // Careful how this is used:
         // 1) Don't delete the object (from helper)
         // 2) Do not store the pointer to the returned object
@@ -110,12 +112,12 @@ class slowConstruction {
             readLock* readLock_= new readLock(objectLock_);
             return helper(object_, readLock_);
         }
-        
+
         // Careful: the state of this can change from false to true (never true->false)
         bool finished() const {
             return finished_;
         }
-        
+
         class helper {
             public:
                 helper(T* object,readLock* lock) : object_(object), lock_(lock) {}
@@ -125,9 +127,9 @@ class slowConstruction {
                 T* object_;
                 readLock* lock_;
         };
-    
+
     private:
-        
+
         void constructAndSwitch(boost::function<T*()> secondConstructor, bool deleteFirst){
             second_= secondConstructor();
             {
@@ -139,7 +141,7 @@ class slowConstruction {
             if (deleteFirst)
                 delete first_;
         }
-        
+
         bool finished_;
         T *first_, *second_, *object_;
         boost::thread *constructor_;

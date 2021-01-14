@@ -24,7 +24,7 @@ No usage or redistribution is allowed without explicit permission.
 
 
 sequentialConstructions::~sequentialConstructions(){
-    t_->join();
+    waitCompletion();
     delete t_;
     for (uint32_t i= 0; i<cleanups_.size(); ++i)
         cleanups_[i]();
@@ -46,6 +46,14 @@ void
 sequentialConstructions::start(){
     started= true;
     t_= new boost::thread(boost::bind(&sequentialConstructions::reallyStart, this));
+}
+
+void
+sequentialConstructions::waitCompletion(){
+  if(!joined){
+    t_->join();
+    joined = true;
+  }
 }
 
 void
