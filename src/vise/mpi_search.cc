@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include <thread>
+#include <unistd.h>
 
 #define BOOST_LOG_DYN_LINK 1
 #include <boost/log/trivial.hpp>
@@ -187,6 +188,14 @@ static void print_row(ofstream& ofs, struct result* result){
       << endl;
 }
 
+static bool rejla_load_timeout(int tout){
+
+  while(!relja->is_loaded() && (tout-- > 0)){
+    sleep(1);
+  }
+  return relja->is_loaded();
+}
+
 int main(int argc, char** argv) {
 
   MPI_INIT_ENV
@@ -228,7 +237,7 @@ int main(int argc, char** argv) {
     boost::mpi::environment::abort(3);
   }
 
-  if(!relja->load()){
+  if(!rejla_load_timeout()){
     if(rank == root){
       cerr << "Error: relja load failed" << endl;
     }
