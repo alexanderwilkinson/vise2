@@ -32,8 +32,8 @@ struct result{  //search result
 };
 
 struct region_query{
-  int file_id;
-  int x,y,width,height;
+  unsigned int file_id;
+  unsigned int x,y,width,height;
 };
 
 static map<string, string> cfg;
@@ -136,10 +136,10 @@ static bool load_rows(const char * image_coordinates_fn, vector<struct region_qu
 
       struct region_query q;
       q.file_id   = relja->get_file_id(columns[0]);
-      q.x         = stoi(columns[1]);
-      q.y         = stoi(columns[2]);
-      q.width     = stoi(columns[3]);
-      q.height    = stoi(columns[4]);
+      q.x         = stoul(columns[1]);
+      q.y         = stoul(columns[2]);
+      q.width     = stoul(columns[3]);
+      q.height    = stoul(columns[4]);
 
       queries.push_back(q);
     }

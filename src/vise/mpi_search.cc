@@ -53,8 +53,8 @@ struct result{  //search result
 BOOST_IS_MPI_DATATYPE (result);
 
 struct region_query{
-  int file_id;
-  int x,y,width,height;
+  unsigned int file_id;
+  unsigned int x,y,width,height;
 };
 
 static map<string, string> cfg;
@@ -164,10 +164,10 @@ static bool load_queries(const char * image_coordinates_fn, vector<struct region
 
       struct region_query q;
       q.file_id   = relja->get_file_id(columns[0]);
-      q.x         = stoi(columns[1]);
-      q.y         = stoi(columns[2]);
-      q.width     = stoi(columns[3]);
-      q.height    = stoi(columns[4]);
+      q.x         = stoul(columns[1]);
+      q.y         = stoul(columns[2]);
+      q.width     = stoul(columns[3]);
+      q.height    = stoul(columns[4]);
 
       queries.push_back(q);
     }
@@ -198,6 +198,8 @@ int main(int argc, char** argv) {
     }
     boost::mpi::environment::abort(1);
   }
+  int buf[2];
+  const int root = (numProc - 1);
 
   if(numProc < 2){
     cerr << "Error: At least two nodes are required!" << endl;
@@ -208,7 +210,7 @@ int main(int argc, char** argv) {
   const float threshold = atof(argv[2]);
 
   if( !load_config(cfg)){
-    if(rank == 0){
+    if(rank == root){
       cerr << "Error: Failed to load config" << endl;
     }
     boost::mpi::environment::abort(2);
@@ -220,7 +222,7 @@ int main(int argc, char** argv) {
 
   relja = new vise::relja_retrival(cfg["se_id"], data_path, asset_path, temp_path);
   if(relja == NULL){
-    if(rank == 0){
+    if(rank == root){
       cerr << "Error: relja_retrival new failed" << endl;
     }
     boost::mpi::environment::abort(3);
@@ -230,7 +232,7 @@ int main(int argc, char** argv) {
   if(!load_queries(image_coordinates_fn, queries)){
     return EXIT_FAILURE;
   }
-  if(rank == 0){
+  if(rank == root){
     cout << "Found " << queries.size() << " queries."<< endl;
   }
 
@@ -238,15 +240,11 @@ int main(int argc, char** argv) {
 
   //query start,end index
   unsigned int start = rank * chunk_size, end = start + chunk_size;
-  if(rank == (numProc-1)){
-    end += queries.size() % (numProc-1);
+  if(rank == (root-1)){
+    end += queries.size() % (root-1);
   }
 
-  int buf[2];
-  const int root = (numProc - 1);
-
-
-  if(rank == root){  //master only saves results
+  if(rank == root){  //only root saves results
 
     //append the threshold parameter to filename
     const string output_filename = "output_" + to_string(threshold) + ".csv";
@@ -286,7 +284,7 @@ int main(int argc, char** argv) {
   vector<struct result> results;
 
 #pragma omp for schedule(dynamic)
-  for(unsigned int i=rank * chunk_size; i < end; i++){
+  for(unsigned int i=start; i < end; ++i){
     se_qeury(cfg["se_id"], i, threshold, results); //search
 
     if(results.size() > 0){
