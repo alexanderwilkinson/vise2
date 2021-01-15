@@ -41,7 +41,7 @@ static vector<struct region_query> queries;
 
 static vise::relja_retrival * relja = NULL;
 
-static bool se_qeury(const string& se_id, struct region_query * q, const float score_threshold, vector<struct result>& results) {
+static bool se_qeury(const string& se_id, const struct region_query * q, const float score_threshold, vector<struct result>& results) {
 
   //result vectors
   std::vector<unsigned int> result_file_id;
