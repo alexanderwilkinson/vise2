@@ -1,11 +1,10 @@
-/** @file   mpi_search.cc
+/** @file   batch_search.cc
  *  @brief  Search with suppport for MPI
  *
  *  @author Kaloyan Petrov (kaloyan_petrov@mail.bg)
  *  @date   11 May 2019
  */
 
-#define RR_MPI
 #include <omp.h>
 
 #include <iostream>
@@ -191,8 +190,6 @@ static void print_row(ofstream& ofs, struct region_query *query, vector<struct r
 }
 
 int main(int argc, char** argv) {
-
-  MPI_INIT_ENV
 
   if(argc != 3){
 
