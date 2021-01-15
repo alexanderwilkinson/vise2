@@ -41,6 +41,33 @@ static vector<struct region_query> queries;
 
 static vise::relja_retrival * relja = NULL;
 
+static void cout_mem(const std::string msg, double amount){
+  std::string units[] = {"KB", "MB", "GB", "TB", "PB"};
+  int u = 0;
+
+  while(amount > 1024){
+    amount /= 1024.0;
+    ++u;
+  }
+  std::cout << msg << " : " << amount << " " << units[u] << std::endl;
+}
+
+static void show_memory_usage(const std::string& msg){
+  int tSize = 0, resident = 0, share = 0;
+  std::ifstream buffer("/proc/self/statm");
+  buffer >> tSize >> resident >> share;
+  buffer.close();
+
+  const long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;
+  const long rss = (resident * page_size_kb);
+  const long shared_mem = (share * page_size_kb);
+
+  std::cout << msg << std::endl;
+  cout_mem("RSS", rss);
+  cout_mem("Shared", shared_mem);
+  cout_mem("Private", rss - shared_mem);
+}
+
 static bool se_qeury(const string& se_id, const struct region_query * q, const float score_threshold, vector<struct result>& results) {
 
   //result vectors
@@ -190,10 +217,13 @@ int main(int argc, char** argv) {
     return 3;
   }
 
+  show_memory_usage("# Memory before relja load");
+
   if(!relja->load()){
     cerr << "Error: relja load failed" << endl;
     return 5;
   }
+  show_memory_usage("# Memory after relja load");
 
   if(!load_rows(image_coordinates_fn, queries)){
     return EXIT_FAILURE;
