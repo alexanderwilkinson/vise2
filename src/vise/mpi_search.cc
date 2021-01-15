@@ -285,6 +285,7 @@ int main(int argc, char** argv) {
 
   cout << "Node " << rank << " queries[" << start << "," << end << "]" << endl;
 
+#if 0
 #pragma omp parallel
 {
   vector<struct result> results;
@@ -302,12 +303,25 @@ int main(int argc, char** argv) {
       }
       results.clear();
     }
+  } //end for
+} //end parallel
+#else
+  vector<struct result> results;
+
+  for(unsigned int i=start; i < end; ++i){
+    se_qeury(cfg["se_id"], i, threshold, results); //search
+
+    if(results.size() > 0){
+      for(unsigned int j=0; j < results.size(); j++){
+        comm.send(root, TAG_RESULT, results[j]);
+      }
+      results.clear();
+    }
   }
-}
+#endif
 
   struct result result;
   comm.send(root, TAG_QUIT, result);
-
 } //end else
 
   delete relja;

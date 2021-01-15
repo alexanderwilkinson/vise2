@@ -210,6 +210,7 @@ int main(int argc, char** argv) {
   //show the column labels
   ofs << "#filename,x,y,width,height,file_id_result,filename2,metadata,score,H0,H1,H2,H3,H4,H5,H6,H7,H8" << endl;
 
+#if 0
 #pragma omp parallel
 {
   vector<struct result> results;  //result array for each thread
@@ -228,8 +229,24 @@ int main(int argc, char** argv) {
       }
       results.clear();
     }
+  }//end for
+} //end parallel
+#else
+
+  vector<struct result> results;  //result array for each thread
+  for(unsigned int i=0; i < queries.size(); i++){
+
+    struct region_query * r = &queries[i];
+    se_qeury(cfg["se_id"], r, threshold, results); //search
+
+    if(results.size() > 0){
+        cout << "Found " << results.size() << " results for row_id=" << i << endl;
+        print_row(ofs, r, results); //save result to output file
+      results.clear();
+    }
   }
-}
+
+#endif
 
   ofs.close();
   delete relja;
