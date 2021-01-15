@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <thread>
+#include <unistd.h>
 
 #define BOOST_LOG_DYN_LINK 1
 #include <boost/log/trivial.hpp>
