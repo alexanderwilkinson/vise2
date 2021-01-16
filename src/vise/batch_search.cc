@@ -5,6 +5,7 @@
  *  @date   11 May 2019
  */
 
+#define RR_MPI
 #include <omp.h>
 
 #include <iostream>
@@ -191,8 +192,9 @@ static void print_row(ofstream& ofs, struct region_query *query, vector<struct r
 
 int main(int argc, char** argv) {
 
-  if(argc != 3){
+  MPI_INIT_ENV
 
+  if(argc != 3){
     cerr << "Usage: " << argv[0] << " ImageCoordinates.csv 50.0" << endl;
     return 1;
   }
