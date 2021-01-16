@@ -153,7 +153,7 @@ static bool load_rows(const char * image_coordinates_fn, vector<struct region_qu
   string line;
   while (getline(ifs, line)){  //read each line from config
 
-    if(line.back() = '\r'){
+    if(line.back() == '\r'){
       line.pop_back();
     }
 
