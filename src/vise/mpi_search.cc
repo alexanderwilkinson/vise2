@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
   //query start,end index
   unsigned int start = rank * chunk_size, end = start + chunk_size;
   if(rank == (root-1)){
-    end += queries.size() % (root-1);
+    end += queries.size() % chunk_size;
   }
 
   if(rank == root){  //only root saves results
