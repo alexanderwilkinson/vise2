@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
   //show the column labels
   ofs << "#filename,x,y,width,height,file_id_result,filename2,metadata,score,H0,H1,H2,H3,H4,H5,H6,H7,H8" << endl;
 
-#if 0
+#if 1
 #pragma omp parallel
 {
   vector<struct result> results;  //result array for each thread

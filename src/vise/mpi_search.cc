@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
 
   cout << "Node " << rank << " queries[" << start << "," << end << "]" << endl;
 
-#if 0
+#if 1
 #pragma omp parallel
 {
   vector<struct result> results;
